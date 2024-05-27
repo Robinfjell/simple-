@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: rgb(46, 37, 37);
+        }
+
+        .app {
+            background: rgb(128, 120, 120);
+            width: 90%;
+            max-width: 550px;
+            margin: 100px auto 0;
+            border-radius: 10px;
+            padding: 10px;
+            height: 500px;
+        }
+
+        .baslik {
+            font-size: 30px;
+            text-align: left;
+            margin: 10px 0 0 10px;
+            border: none;
+            border-bottom: 2px solid silver;
+            padding-bottom: 15px;
+        }
+
+        .quiz {
+            padding: 20px 0;
+        }
+
+        #question {
+            text-align: center;
+            border: none;
+            border-bottom: 2px solid silver;
+            padding: 0 0 7px 0;
+        }
+
+        .answer-buttons {
+            font-size: 30px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            justify-content: space-between;
+        }
+
+        .answer-buttons button {
+            width: 90%;
+            height: 50px;
+            margin-bottom: 10px;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            padding-left: 10px;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+        }
+
+        .answer-buttons .btn:hover {
+            background-color: rgb(126, 90, 90);
+        }
+
+        .correct {
+            background-color: rgb(48, 213, 48) !important;
+            color: white;
+        }
+
+        .wrong {
+            background-color: rgb(181, 3, 3) !important;
+            color: white;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            font-size: 23px;
+        }
+
+        .btn.correct::after {
+            content: '✔️';
+        }
+
+        .btn.wrong::after {
+            content: '❌';
+        }
+
+        #next {
+            padding: 5px 35px;
+            border-radius: 5px;
+            font-size: 27px;
+            margin-left: 5%;
+            margin-top: 5%;
+            font-weight: bold;
+            background-color: rgb(44, 44, 245);
+            color: white;
+            cursor: pointer;
+            margin-left: 35%;
+        }
+
+        #next:hover {
+            background-color: rgb(78, 115, 59);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1 class="baslik">Simple Quiz</h1>
+        <div class="quiz">
+            <h2 id="question">Sorular buraya gelecek...</h2>
+            <div class="answer-buttons" id="answer-buttons">
+                <!-- Butonlar burada olacak -->
+            </div>
+            <button id="next" class="hide">Next</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const questionElement = document.getElementById("question");
+            const answerButtonsElement = document.getElementById("answer-buttons");
+            const nextButtonElement = document.getElementById("next");
+
+            let currentQuestionIndex = 0;
+            let score = 0;
+
+            const questions = [
+                {
+                    question: "Dünya'nın en yüksek dağı hangisidir?",
+                    answers: [
+                        { text: "Kilimanjaro", correct: false },
+                        { text: "K2", correct: true },
+                        { text: "Everest", correct: false },
+                        { text: "Denali", correct: false }
+                    ]
+                },
+                {
+                    question: "Hangisi bir programlama dili değildir?",
+                    answers: [
+                        { text: "Python", correct: false },
+                        { text: "JavaScript", correct: false },
+                        { text: "HTML", correct: true },
+                        { text: "C++", correct: false }
+                    ]
+                },
+                {
+                    question: "Hangi elementin kimyasal sembolü 'O' dur?",
+                    answers: [
+                        { text: "Altın", correct: false },
+                        { text: "Gümüş", correct: false },
+                        { text: "Oksijen", correct: true },
+                        { text: "Hidrojen", correct: false }
+                    ]
+                },
+                {
+                    question: "Türkiye'nin başkenti hangi şehirdir?",
+                    answers: [
+                        { text: "İstanbul", correct: false },
+                        { text: "Ankara", correct: true },
+                        { text: "İzmir", correct: false },
+                        { text: "Bursa", correct: false }
+                    ]
+                },
+                {
+                    question: "Hangisi bir gezegen değildir?",
+                    answers: [
+                        { text: "Mars", correct: false },
+                        { text: "Venüs", correct: false },
+                        { text: "Plüton", correct: true },
+                        { text: "Sirius", correct: false }
+                    ]
+                }
+            ];
+
+            function startQuiz() {
+                currentQuestionIndex = 0;
+                score = 0;
+                nextButtonElement.innerHTML = "Next";
+                nextButtonElement.classList.add('hide');
+                showQuestion();
+            }
+
+            function showQuestion() {
+                resetState();
+                const currentQuestion = questions[currentQuestionIndex];
+                questionElement.innerText = currentQuestion.question;
+
+                currentQuestion.answers.forEach(answer => {
+                    const button = document.createElement("button");
+                    button.innerText = answer.text;
+                    button.classList.add("btn");
+                    button.addEventListener("click", () => selectAnswer(button, answer.correct));
+                    answerButtonsElement.appendChild(button);
+                });
+            }
+
+            function resetState() {
+                nextButtonElement.classList.add('hide');
+                while (answerButtonsElement.firstChild) {
+                    answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+                }
+            }
+
+            function selectAnswer(button, correct) {
+                Array.from(answerButtonsElement.children).forEach(btn => {
+                    btn.disabled = true;
+                    if (btn.innerText === questions[currentQuestionIndex].answers.find(answer => answer.correct).text) {
+                        btn.classList.add('correct');
+                    }
+                });
+
+                if (correct) {
+                    button.classList.add('correct');
+                    score++;
+                } else {
+                    button.classList.add('wrong');
+                }
+
+                nextButtonElement.classList.remove('hide');
+            }
+
+            nextButtonElement.addEventListener("click", () => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    showQuestion();
+                } else {
+                    alert("Quiz finished! Your score: " + score);
+                    startQuiz();
+                }
+            });
+
+            startQuiz();
+        });
+    </script>
+</body>
+</html>
